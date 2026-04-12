@@ -1295,10 +1295,7 @@
       throw new Error(`API error ${res.status}: ${txt}`);
     }
 
-    const data = await res.json();
-    let raw = data.content[0].text.trim();
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-    return JSON.parse(raw);
+    return await res.json(); // function returns {title, description, imagePrompt} directly
   }
 
   // ──────────────────────────────────────────────────
