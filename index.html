@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dream Home Generator — Thinking in Space</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232D4A3E'/%3E%3Ctext x='5' y='22' font-family='Georgia,serif' font-style='italic' font-size='14' fill='%23F7F4EF'%3ET%3C/text%3E%3Ctext x='14' y='22' font-family='Georgia,serif' font-style='italic' font-size='14' fill='%235B8FA8'%3Ein%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --forest-primary: #2D4A3E;
+      --forest-mid:     #3D5A50;
+      --sky-teal:       #5B8FA8;
+      --cta-blue:       #4A7FA5;
+      --warm-white:     #F7F4EF;
+      --off-white:      #EDE9E2;
+      --text-dark:      #1C1C1C;
+      --text-mid:       #4A4A4A;
+      --text-light:     #8A8A8A;
+      --border:         #D8D4CC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      background: var(--warm-white);
+      color: var(--text-dark);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Screen management ── */
+    .screen { display: none; min-height: 100vh; width: 100%; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ══════════════════════════════════════
+       SCREEN 1 — LANDING
+    ══════════════════════════════════════ */
+    #screen-landing {
+      background: var(--forest-primary);
+      position: relative;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Animated geometric background */
+    .bg-geo {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .geo-shape {
+      position: absolute;
+      border: 1px solid rgba(247,244,239,0.05);
+      animation: geoFloat ease-in-out infinite;
+    }
+    .geo-shape:nth-child(1) { width:340px;height:340px; top:-80px;left:-100px; border-radius:0; transform:rotate(20deg); animation-duration:28s; }
+    .geo-shape:nth-child(2) { width:220px;height:220px; top:35%;right:-60px; border-radius:50%; animation-duration:22s; animation-delay:-7s; }
+    .geo-shape:nth-child(3) { width:480px;height:480px; bottom:-140px;left:28%; border-radius:0; transform:rotate(45deg); animation-duration:35s; animation-delay:-14s; }
+    .geo-shape:nth-child(4) { width:160px;height:160px; top:18%;left:22%; border-radius:0; transform:rotate(10deg); animation-duration:18s; animation-delay:-4s; }
+    .geo-shape:nth-child(5) { width:60px;height:60px; top:60%;left:60%; border-radius:50%; animation-duration:14s; animation-delay:-9s; }
+
+    @keyframes geoFloat {
+      0%,100% { transform: translateY(0) rotate(0deg); opacity:0.5; }
+      50%      { transform: translateY(-28px) rotate(4deg); opacity:1; }
+    }
+
+    /* Noise texture overlay */
+    .bg-noise {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .landing-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 48px 28px;
+      max-width: 660px;
+      animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .landing-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--sky-teal);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .landing-eyebrow::before,
+    .landing-eyebrow::after {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: var(--sky-teal);
+      opacity: 0.5;
+    }
+
+    .landing-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(52px, 9vw, 88px);
+      line-height: 1.02;
+      color: var(--warm-white);
+      letter-spacing: -0.03em;
+      margin-bottom: 22px;
+    }
+
+    .landing-subline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(18px, 2.8vw, 24px);
+      color: var(--sky-teal);
+      margin-bottom: 22px;
+      line-height: 1.45;
+    }
+
+    .landing-body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: rgba(247,244,239,0.58);
+      line-height: 1.75;
+      margin-bottom: 52px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-cta {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: var(--cta-blue);
+      padding: 15px 40px;
+      border-radius: 3px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.18s ease, transform 0.12s ease;
+      min-height: 48px;
+    }
+    .btn-cta:hover  { opacity: 0.86; transform: translateY(-2px); }
+    .btn-cta:active { opacity: 1; transform: translateY(0); }
+    .btn-cta:focus-visible { outline: 2px solid var(--sky-teal); outline-offset: 4px; }
+
+    /* ══════════════════════════════════════
+       SCREEN 2 — QUIZ
+    ══════════════════════════════════════ */
+    #screen-quiz {
+      background: var(--warm-white);
+    }
+
+    .quiz-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--warm-white);
+    }
+
+    .progress-track {
+      height: 3px;
+      background: var(--border);
+      width: 100%;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--forest-primary);
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    .quiz-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quiz-counter {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--text-light);
+    }
+
+    .quiz-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--forest-primary);
+      letter-spacing: 0.01em;
+    }
+    .quiz-wordmark em { font-style: italic; color: var(--sky-teal); }
+
+    .quiz-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 28px 72px;
+      max-width: 740px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    @media (max-width: 768px) {
+      .quiz-body {
+        justify-content: flex-start;
+        padding: 36px 20px 40px;
+      }
+      .quiz-q-text {
+        margin-bottom: 28px;
+      }
+    }
+
+    .quiz-q-wrap {
+      width: 100%;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .quiz-q-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.18;
+      color: var(--text-dark);
+      letter-spacing: -0.025em;
+      margin-bottom: 44px;
+      text-align: center;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      .quiz-options { grid-template-columns: 1fr; gap: 8px; }
+    }
+
+    .quiz-opt {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 18px 20px;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--text-mid);
+      line-height: 1.45;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 68px;
+      transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.1s ease, background 0.14s ease;
+    }
+    .quiz-opt:hover {
+      border-color: var(--forest-mid);
+      box-shadow: 0 3px 14px rgba(45,74,62,0.09), 0 1px 3px rgba(45,74,62,0.05);
+      transform: translateY(-1px);
+    }
+    .quiz-opt:active  { transform: translateY(0); }
+    .quiz-opt:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+    .quiz-opt.selected {
+      border-color: var(--forest-primary);
+      background: var(--off-white);
+      color: var(--text-dark);
+    }
+    .quiz-opt:disabled { cursor: default; }
+
+    .opt-check {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.14s, border-color 0.14s;
+    }
+    .quiz-opt.selected .opt-check {
+      background: var(--forest-primary);
+      border-color: var(--forest-primary);
+    }
+    .opt-check svg { opacity: 0; transition: opacity 0.14s; }
+    .quiz-opt.selected .opt-check svg { opacity: 1; }
+
+    /* ══════════════════════════════════════
+       SCREEN 3 — LOADING
+    ══════════════════════════════════════ */
+    #screen-loading {
+      background: var(--forest-primary);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .loading-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
+      height: 60px;
+      margin-bottom: 44px;
+    }
+    .loading-bar {
+      width: 7px;
+      border-radius: 3px;
+      background: rgba(247,244,239,0.45);
+      animation: barPulse 1.5s ease-in-out infinite;
+    }
+    .loading-bar:nth-child(1) { height:22px; animation-delay:0s; }
+    .loading-bar:nth-child(2) { height:38px; animation-delay:0.18s; }
+    .loading-bar:nth-child(3) { height:54px; animation-delay:0.36s; }
+    .loading-bar:nth-child(4) { height:38px; animation-delay:0.54s; }
+    .loading-bar:nth-child(5) { height:22px; animation-delay:0.72s; }
+
+    @keyframes barPulse {
+      0%,100% { opacity:0.28; transform:scaleY(0.75); }
+      50%      { opacity:1;    transform:scaleY(1); }
+    }
+
+    .loading-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 28px;
+      color: var(--warm-white);
+      margin-bottom: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .loading-status {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--sky-teal);
+      letter-spacing: 0.09em;
+      min-height: 22px;
+      transition: opacity 0.25s ease;
+    }
+
+    .loading-note {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: rgba(247,244,239,0.35);
+      margin-top: 36px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ══════════════════════════════════════
+       SCREEN 4 — RESULT
+    ══════════════════════════════════════ */
+    #screen-result {
+      background: var(--warm-white);
+    }
+
+    .result-topbar {
+      border-bottom: 1px solid var(--border);
+      padding: 15px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--warm-white);
+    }
+
+    .result-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      color: var(--forest-primary);
+      letter-spacing: 0.01em;
+    }
+    .result-wordmark em { font-style: italic; color: var(--sky-teal); }
+
+    .btn-restart {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-mid);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 9px 18px;
+      cursor: pointer;
+      min-height: 38px;
+      transition: border-color 0.14s, color 0.14s, background 0.14s;
+    }
+    .btn-restart:hover { border-color: var(--forest-primary); color: var(--text-dark); background: var(--off-white); }
+    .btn-restart:active { background: var(--border); }
+    .btn-restart:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 52px;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 52px 36px 96px;
+      animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @media (max-width: 767px) {
+      .result-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 28px 20px 72px;
+      }
+    }
+
+    /* ── Image column ── */
+    #image-container {
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--off-white);
+      aspect-ratio: 16/9;
+      position: relative;
+      min-height: 180px;
+    }
+    #result-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 8px;
+      animation: fadeUp 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .img-timeout {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      text-align: center;
+    }
+    .img-timeout p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text-light);
+      line-height: 1.65;
+    }
+
+    /* skeleton shimmer */
+    @keyframes shimmer {
+      0%   { background-position: -400% 0; }
+      100% { background-position:  400% 0; }
+    }
+    .shimmer {
+      background: linear-gradient(90deg, var(--off-white) 25%, var(--border) 50%, var(--off-white) 75%);
+      background-size: 400% 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    /* Image generation progress bar */
+    .img-progress-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+    }
+    .img-progress-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--text-light);
+    }
+    .img-progress-track {
+      width: 100%;
+      max-width: 200px;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .img-progress-fill {
+      height: 100%;
+      background: var(--forest-primary);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .image-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn-img-action {
+      flex: 1;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      padding: 12px 16px;
+      min-height: 48px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: border-color 0.14s, background 0.14s, color 0.14s, transform 0.1s;
+    }
+    .btn-img-action:hover  { border-color: var(--forest-mid); background: var(--off-white); color: var(--text-dark); transform: translateY(-1px); }
+    .btn-img-action:active { transform: translateY(0); }
+    .btn-img-action:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+    .btn-img-action.filled {
+      background: var(--forest-primary);
+      border-color: var(--forest-primary);
+      color: #fff;
+    }
+    .btn-img-action.filled:hover { background: var(--forest-mid); border-color: var(--forest-mid); color: #fff; }
+
+    /* ── Brief column ── */
+    .brief-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--text-light);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .brief-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.14;
+      color: var(--text-dark);
+      letter-spacing: -0.025em;
+      margin-bottom: 26px;
+    }
+
+    .brief-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14.5px;
+      line-height: 1.78;
+      color: var(--text-mid);
+      margin-bottom: 30px;
+    }
+    .brief-desc p + p { margin-top: 13px; }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .spec-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 13px 15px;
+    }
+    .spec-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .spec-value {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      color: var(--text-dark);
+      line-height: 1.3;
+    }
+
+    .brief-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 26px;
+    }
+
+    /* ── Beehiiv block ── */
+    .beehiiv-block {
+      background: var(--off-white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 26px 22px 24px;
+    }
+    .beehiiv-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--forest-primary);
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+      display: block;
+    }
+    .beehiiv-wordmark em { font-style: italic; color: var(--sky-teal); }
+    .beehiiv-headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 19px;
+      color: var(--text-dark);
+      margin-bottom: 9px;
+      line-height: 1.3;
+    }
+    .beehiiv-body {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 13.5px;
+      line-height: 1.68;
+      color: var(--text-mid);
+      margin-bottom: 18px;
+    }
+    .btn-beehiiv {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      color: #fff;
+      background: var(--cta-blue);
+      padding: 11px 26px;
+      min-height: 42px;
+      border-radius: 3px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-beehiiv:hover  { opacity: 0.86; transform: translateY(-1px); }
+    .btn-beehiiv:active { opacity: 1; transform: translateY(0); }
+    .btn-beehiiv:focus-visible { outline: 2px solid var(--forest-primary); outline-offset: 3px; }
+
+    /* ── Error block ── */
+    .error-block {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      border-radius: 5px;
+      padding: 14px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #B91C1C;
+      line-height: 1.55;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .error-block.show { display: block; }
+    .btn-retry {
+      margin-top: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--forest-primary);
+      background: none;
+      border: 1px solid var(--forest-primary);
+      border-radius: 3px;
+      padding: 7px 16px;
+      cursor: pointer;
+      transition: background 0.14s, color 0.14s;
+    }
+    .btn-retry:hover { background: var(--forest-primary); color: #fff; }
+
+    /* ══════════════════════════════════════
+       SHARE MODAL
+    ══════════════════════════════════════ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(28,28,28,0.55);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      padding: 38px 30px 30px;
+      max-width: 420px;
+      width: 100%;
+      position: relative;
+      transform: translateY(18px);
+      transition: transform 0.22s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 20px 60px rgba(28,28,28,0.16), 0 4px 14px rgba(28,28,28,0.08);
+    }
+    .overlay.open .modal { transform: translateY(0); }
+
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 30px; height: 30px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      border-radius: 4px;
+      transition: color 0.14s, background 0.14s;
+      min-height: 30px;
+    }
+    .modal-close:hover { color: var(--text-dark); background: var(--off-white); }
+    .modal-close:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 23px;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      padding-right: 28px;
+    }
+    .modal-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .share-list { display: flex; flex-direction: column; gap: 9px; }
+    .btn-share-option {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--text-dark);
+      min-height: 52px;
+      transition: border-color 0.14s, background 0.14s;
+    }
+    .btn-share-option:hover { border-color: var(--forest-mid); background: var(--warm-white); }
+    .btn-share-option:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+    .share-icon {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .copy-feedback {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--forest-primary);
+      margin-top: 10px;
+      min-height: 16px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ══════════════════════════════════════
+       SHARED ANIMATIONS
+    ══════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 1 — LANDING
+════════════════════════════════════════════════ -->
+<section id="screen-landing" class="screen active" role="main" aria-label="Dream Home Generator introduction">
+  <div class="bg-geo" aria-hidden="true">
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+    <div class="geo-shape"></div>
+  </div>
+  <div class="bg-noise" aria-hidden="true"></div>
+
+  <div class="landing-content">
+    <p class="landing-eyebrow">Thinking <em style="font-style:italic;color:var(--sky-teal)">in</em> Space</p>
+    <h1 class="landing-headline">Design Your<br>Dream Home</h1>
+    <p class="landing-subline">10 questions. One image. Entirely yours.</p>
+    <p class="landing-body">Answer a short quiz and watch AI design the home you've always imagined.</p>
+    <button class="btn-cta" id="btn-begin">Begin &rarr;</button>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 2 — QUIZ
+════════════════════════════════════════════════ -->
+<section id="screen-quiz" class="screen" aria-label="Quiz">
+  <div class="quiz-topbar">
+    <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progress-bar-wrap">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="quiz-nav">
+      <span class="quiz-counter" id="quiz-counter" aria-live="polite" aria-atomic="true">01 / 10</span>
+      <span class="quiz-wordmark">Thinking <em>in</em> Space</span>
+    </div>
+  </div>
+
+  <div class="quiz-body">
+    <div id="quiz-q-wrap" class="quiz-q-wrap">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 3 — LOADING
+════════════════════════════════════════════════ -->
+<section id="screen-loading" class="screen" aria-label="Generating your dream home" aria-live="polite">
+  <div class="loading-bars" aria-hidden="true">
+    <div class="loading-bar"></div>
+    <div class="loading-bar"></div>
+    <div class="loading-bar"></div>
+    <div class="loading-bar"></div>
+    <div class="loading-bar"></div>
+  </div>
+  <p class="loading-headline">Building your dream home&hellip;</p>
+  <p class="loading-status" id="loading-status">Reading your answers...</p>
+  <p class="loading-note">This usually takes 15–25 seconds</p>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     SCREEN 4 — RESULT
+════════════════════════════════════════════════ -->
+<section id="screen-result" class="screen" aria-label="Your dream home result">
+  <div class="result-topbar">
+    <a href="https://thinkinginspace.beehiiv.com/" target="_blank" rel="noopener noreferrer" class="result-wordmark" style="text-decoration:none;">Thinking <em>in</em> Space</a>
+    <button class="btn-restart" id="btn-restart">&larr; Start Over</button>
+  </div>
+
+  <div class="result-grid">
+    <!-- Left: image -->
+    <div>
+      <div id="image-container" class="shimmer"></div>
+      <div class="image-actions">
+        <button class="btn-img-action filled" id="btn-download">&darr; Download Image</button>
+        <button class="btn-img-action" id="btn-share-open">Share &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Right: brief -->
+    <div>
+      <p class="brief-label">Your Dream Home Brief</p>
+      <h2 class="brief-title" id="brief-title">&nbsp;</h2>
+
+      <div class="error-block" id="error-block" role="alert">
+        Something went wrong generating your brief. Please try again.
+        <br>
+        <button class="btn-retry" id="btn-retry">Retry &rarr;</button>
+      </div>
+
+      <div class="brief-desc" id="brief-desc"></div>
+
+      <div class="specs-grid" id="specs-grid"></div>
+
+      <div class="brief-divider"></div>
+
+      <div class="beehiiv-block">
+        <a href="https://thinkinginspace.beehiiv.com/" target="_blank" rel="noopener noreferrer" class="beehiiv-wordmark" style="text-decoration:none;">Thinking <em>in</em> Space</a>
+        <p class="beehiiv-headline">Want more architecture like this?</p>
+        <p class="beehiiv-body">Thinking in Space is a free newsletter exploring how design shapes the way we live.</p>
+        <a href="https://thinkinginspace.beehiiv.com/" target="_blank" rel="noopener noreferrer" class="btn-beehiiv">Subscribe Free &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     LIGHTBOX
+════════════════════════════════════════════════ -->
+<div class="overlay" id="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Expanded home image" style="padding:0;">
+  <div id="lightbox-inner" style="position:relative;max-width:92vw;max-height:92vh;display:flex;align-items:center;justify-content:center;">
+    <img id="lightbox-img" src="" alt="Dream home expanded view"
+      style="max-width:92vw;max-height:92vh;border-radius:6px;display:block;box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+    <button id="lightbox-close" aria-label="Close"
+      style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);color:var(--text-mid);transition:background 0.14s;">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SHARE MODAL
+════════════════════════════════════════════════ -->
+<div class="overlay" id="share-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+  <div class="modal">
+    <button class="modal-close" id="modal-close" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <h3 class="modal-title" id="modal-heading">Share Your Dream Home</h3>
+    <p class="modal-sub">Show the world what AI designed for you.</p>
+
+    <div class="share-list">
+      <button class="btn-share-option" id="btn-copy">
+        <span class="share-icon" style="background:#F0EFED;" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M5.5 9.5L9.5 5.5M6 3.5H3.5a2 2 0 000 4H4M9 11.5h2.5a2 2 0 000-4H11" stroke="#4A4A4A" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        Copy Link
+      </button>
+
+      <button class="btn-share-option" id="btn-twitter">
+        <span class="share-icon" style="background:#000;" aria-hidden="true">
+          <svg width="14" height="13" viewBox="0 0 14 13" fill="none">
+            <path d="M8.12 5.52 13.2 0H12L7.56 4.8 3.74 0H0l5.32 7.74L0 13h1.2l4.65-5.41L9.8 13H13.6L8.12 5.52ZM6.52 6.85l-.54-.77-4.27-6.1H3.2L7 5.7l.54.77 4.47 6.4H10.5L6.52 6.85Z" fill="#fff"/>
+          </svg>
+        </span>
+        Share on X (Twitter)
+      </button>
+
+      <button class="btn-share-option" id="btn-whatsapp">
+        <span class="share-icon" style="background:#25D366;" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C4.13 1 1 4.13 1 8c0 1.24.34 2.4.92 3.4L1 15l3.68-.9A7 7 0 108 1zm0 12.6A5.6 5.6 0 012.4 8 5.6 5.6 0 018 2.4 5.6 5.6 0 0113.6 8 5.6 5.6 0 018 13.6zm3.06-4.22c-.17-.08-1-.5-1.16-.55-.15-.06-.27-.08-.38.08-.11.16-.44.55-.54.67-.1.11-.2.12-.37.04-.17-.08-.72-.27-1.37-.85a5.2 5.2 0 01-.95-1.18c-.1-.17-.01-.26.07-.34.08-.07.17-.2.26-.3.09-.1.11-.17.17-.28.06-.11.03-.21-.01-.29-.04-.08-.38-.91-.52-1.25-.14-.32-.27-.28-.38-.28h-.33c-.11 0-.29.04-.44.2-.15.17-.59.58-.59 1.4 0 .83.6 1.63.69 1.74.08.11 1.19 1.81 2.87 2.54.4.17.72.28.96.35.4.13.77.11 1.06.07.32-.05 1-.41 1.14-.8.14-.4.14-.74.1-.8-.04-.08-.15-.12-.32-.2z" fill="#fff"/>
+          </svg>
+        </span>
+        Share on WhatsApp
+      </button>
+    </div>
+
+    <p class="copy-feedback" id="copy-feedback" aria-live="polite"></p>
+  </div>
+</div>
+
+
+<script>
+  // ──────────────────────────────────────────────────
+  // API endpoint — proxied through Netlify Function (key lives in env var, never in browser)
+  // ──────────────────────────────────────────────────
+  const API_ENDPOINT = '/.netlify/functions/generate';
+
+  // ──────────────────────────────────────────────────
+  // QUIZ DATA
+  // ──────────────────────────────────────────────────
+  const QUESTIONS = [
+    {
+      q: 'Where is your dream home located?',
+      opts: ['Deep in the mountains', 'Beachfront / coastal', 'Desert / wide open landscape', 'In a city / urban environment']
+    },
+    {
+      q: 'What kind of setting do you prefer?',
+      opts: ['Totally private, surrounded by nature', 'Open views with a few neighbors', 'Neighborhood / community feel', 'Right in the middle of activity']
+    },
+    {
+      q: 'What architectural style speaks to you most?',
+      opts: ['Modern / minimal', 'Rustic / cabin / natural materials', 'Mediterranean / warm + textured', 'Classic / traditional']
+    },
+    {
+      q: 'What matters most about the exterior?',
+      opts: ['Blending into the landscape', 'Bold, statement design', 'Warm and inviting feel', 'Clean and simple geometry']
+    },
+    {
+      q: 'How should light enter your home?',
+      opts: ['Large floor-to-ceiling glass walls', 'Filtered, soft light (screens, overhangs)', 'Skylights / light from above', 'Smaller, framed windows']
+    },
+    {
+      q: "What's your ideal interior vibe?",
+      opts: ['Calm, minimal, almost gallery-like', 'Cozy and layered', 'Bright and airy', 'Rich and detailed']
+    },
+    {
+      q: 'Pick a key feature:',
+      opts: ['Infinity pool', 'Fireplace + lounge space', 'Courtyard / outdoor room', 'Rooftop terrace']
+    },
+    {
+      q: 'How connected should indoors and outdoors be?',
+      opts: ['Fully open (walls disappear)', 'Strong connection but defined spaces', 'Occasional connection', 'Mostly separate']
+    },
+    {
+      q: 'What materials do you gravitate toward?',
+      opts: ['Concrete, glass, steel', 'Wood, stone, natural textures', 'Stucco, tile, warm finishes', 'Brick, traditional detailing']
+    },
+    {
+      q: 'What feeling should your home give you?',
+      opts: ['Peaceful + retreat-like', 'Grounded + warm', 'Energizing + vibrant', 'Refined + timeless']
+    }
+  ];
+
+  // ──────────────────────────────────────────────────
+  // STATE
+  // ──────────────────────────────────────────────────
+  let currentQ       = 0;
+  let answers        = new Array(10).fill(null);
+  let imageUrl       = null;
+  let lastImgPrompt  = null;
+  let statusTimer    = null;
+
+  // ──────────────────────────────────────────────────
+  // SCREEN SWITCHER
+  // ──────────────────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // ──────────────────────────────────────────────────
+  // QUIZ RENDERING
+  // ──────────────────────────────────────────────────
+  function renderQuestion(idx) {
+    const { q, opts } = QUESTIONS[idx];
+    const wrap = document.getElementById('quiz-q-wrap');
+    const fill = document.getElementById('progress-fill');
+    const counter = document.getElementById('quiz-counter');
+    const bar = document.getElementById('progress-bar-wrap');
+
+    counter.textContent = String(idx + 1).padStart(2, '0') + ' / 10';
+    fill.style.width = (idx / 10 * 100) + '%';
+    bar.setAttribute('aria-valuenow', Math.round(idx / 10 * 100));
+
+    // Fade out
+    wrap.style.opacity = '0';
+    wrap.style.transform = 'translateY(10px)';
+
+    const delay = idx === 0 ? 0 : 180;
+    setTimeout(() => {
+      wrap.innerHTML = `
+        <h2 class="quiz-q-text" id="q-text">${q}</h2>
+        <div class="quiz-options" role="radiogroup" aria-labelledby="q-text">
+          ${opts.map((o, i) => `
+            <button
+              class="quiz-opt"
+              data-i="${i}"
+              role="radio"
+              aria-checked="false"
+              tabindex="0"
+            >
+              <span>${o}</span>
+              <span class="opt-check" aria-hidden="true">
+                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <path d="M1 4l2.5 2.5L9 1" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      wrap.style.transition = 'opacity 0.24s ease, transform 0.24s ease';
+      wrap.style.opacity = '1';
+      wrap.style.transform = 'translateY(0)';
+
+      wrap.querySelectorAll('.quiz-opt').forEach(btn => {
+        btn.addEventListener('click', () => handleAnswer(idx, parseInt(btn.dataset.i)));
+        btn.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAnswer(idx, parseInt(btn.dataset.i)); }
+        });
+      });
+    }, delay);
+  }
+
+  function handleAnswer(qIdx, optIdx) {
+    answers[qIdx] = QUESTIONS[qIdx].opts[optIdx];
+
+    // Mark selection visually
+    const wrap = document.getElementById('quiz-q-wrap');
+    wrap.querySelectorAll('.quiz-opt').forEach(btn => {
+      btn.disabled = true;
+      if (parseInt(btn.dataset.i) === optIdx) {
+        btn.classList.add('selected');
+        btn.setAttribute('aria-checked', 'true');
+      }
+    });
+
+    // Update progress to reflect answered question
+    document.getElementById('progress-fill').style.width = ((qIdx + 1) / 10 * 100) + '%';
+    document.getElementById('progress-bar-wrap').setAttribute('aria-valuenow', Math.round((qIdx + 1) / 10 * 100));
+
+    setTimeout(() => {
+      if (qIdx < 9) {
+        currentQ = qIdx + 1;
+        renderQuestion(currentQ);
+      } else {
+        beginGeneration();
+      }
+    }, 300);
+  }
+
+  // ──────────────────────────────────────────────────
+  // LOADING STATUS CYCLE
+  // ──────────────────────────────────────────────────
+  const STATUSES = [
+    'Reading your answers...',
+    'Consulting the architect...',
+    'Selecting materials...',
+    'Placing the windows...',
+    'Almost there...'
+  ];
+  let statusIdx = 0;
+
+  function startStatusCycle() {
+    const el = document.getElementById('loading-status');
+    statusIdx = 0;
+    el.textContent = STATUSES[0];
+    el.style.opacity = '1';
+
+    statusTimer = setInterval(() => {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        statusIdx = (statusIdx + 1) % STATUSES.length;
+        el.textContent = STATUSES[statusIdx];
+        el.style.opacity = '1';
+      }, 260);
+    }, 2500);
+  }
+
+  function stopStatusCycle() {
+    if (statusTimer) { clearInterval(statusTimer); statusTimer = null; }
+  }
+
+  // ──────────────────────────────────────────────────
+  // GENERATION FLOW
+  // ──────────────────────────────────────────────────
+  async function beginGeneration() {
+    showScreen('screen-loading');
+    startStatusCycle();
+
+    try {
+      const { title, description, imagePrompt } = await callClaude();
+      lastImgPrompt = imagePrompt;
+
+      const seed = Math.floor(Math.random() * 99999);
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=768&height=432&model=turbo&seed=${seed}`;
+      console.log('[Pollinations URL]', imageUrl);
+
+      buildResultUI(title, description, imageUrl);
+
+      // Show result immediately — image loads in background
+      stopStatusCycle();
+      showScreen('screen-result');
+
+    } catch (err) {
+      console.error(err);
+      stopStatusCycle();
+      buildResultUIError(err.message || 'Something went wrong. Please try again.');
+      showScreen('screen-result');
+    }
+  }
+
+  function retryImage() {
+    if (!lastImgPrompt) return;
+    const seed = Math.floor(Math.random() * 99999);
+    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(lastImgPrompt)}?width=768&height=432&model=turbo&seed=${seed}`;
+    console.log('[Pollinations retry URL]', imageUrl);
+    loadImageWithRetry(imageUrl);
+  }
+
+  // Progress bar state
+  let _progressTimer = null;
+
+  function startProgressBar(estimatedMs) {
+    const fill = document.getElementById('img-progress-fill');
+    if (!fill) return;
+    let pct = 0;
+    const step = 100 / (estimatedMs / 200); // tick every 200ms
+    clearInterval(_progressTimer);
+    _progressTimer = setInterval(() => {
+      // Ease into 85% quickly, then crawl toward 95%
+      const target = pct < 85 ? pct + step : pct + step * 0.08;
+      pct = Math.min(target, 95);
+      fill.style.width = pct + '%';
+    }, 200);
+  }
+
+  function finishProgressBar() {
+    clearInterval(_progressTimer);
+    const fill = document.getElementById('img-progress-fill');
+    if (fill) fill.style.width = '100%';
+  }
+
+  function loadImageWithRetry(src, attempt) {
+    attempt = attempt || 1;
+    const MAX = 8;
+    const DELAY = 5000; // 5s between attempts
+
+    const container = document.getElementById('image-container');
+
+    if (attempt === 1) {
+      container.classList.remove('shimmer');
+      container.innerHTML = `
+        <div class="img-progress-wrap">
+          <p class="img-progress-label" id="img-status">Rendering your home…</p>
+          <div class="img-progress-track">
+            <div class="img-progress-fill" id="img-progress-fill"></div>
+          </div>
+        </div>
+      `;
+      startProgressBar(8000); // estimate ~8s for turbo
+    }
+
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';
+
+    img.onload = () => {
+      finishProgressBar();
+      setTimeout(() => {
+        img.id = 'result-img';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;opacity:0;transition:opacity 0.4s ease;cursor:zoom-in;';
+        img.alt = 'AI-generated home render';
+        img.title = 'Click to expand';
+        container.innerHTML = '';
+        container.appendChild(img);
+        // Expand icon overlay
+        const hint = document.createElement('div');
+        hint.style.cssText = 'position:absolute;bottom:10px;right:10px;background:rgba(28,28,28,0.55);border-radius:4px;padding:5px 8px;display:flex;align-items:center;gap:5px;pointer-events:none;opacity:0;transition:opacity 0.2s;';
+        hint.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 1.5H10.5V4.5M4.5 10.5H1.5V7.5M10.5 1.5L6.5 5.5M1.5 10.5L5.5 6.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:DM Sans,sans-serif;font-size:11px;color:white;letter-spacing:0.03em;">Expand</span>';
+        container.style.position = 'relative';
+        container.appendChild(hint);
+        container.addEventListener('mouseenter', () => hint.style.opacity = '1');
+        container.addEventListener('mouseleave', () => hint.style.opacity = '0');
+        // Click to open lightbox
+        img.addEventListener('click', () => openLightbox(img.src));
+        // Fade in
+        requestAnimationFrame(() => requestAnimationFrame(() => { img.style.opacity = '1'; }));
+      }, 300);
+    };
+
+    img.onerror = () => {
+      if (attempt < MAX) {
+        const waited = attempt * (DELAY / 1000);
+        const status = document.getElementById('img-status');
+        if (status) status.textContent = `Still rendering… (${waited}s)`;
+        setTimeout(() => loadImageWithRetry(src, attempt + 1), DELAY);
+      } else {
+        clearInterval(_progressTimer);
+        container.classList.remove('shimmer');
+        container.innerHTML = `<div class="img-timeout">
+          <p>Pollinations timed out. <button onclick="retryImage()" style="color:var(--cta-blue);background:none;border:none;cursor:pointer;font-size:14px;text-decoration:underline;padding:0;">Try with a new seed</button></p>
+        </div>`;
+      }
+    };
+
+    img.src = src; // same URL each retry so Pollinations can serve cached result
+  }
+
+  // ──────────────────────────────────────────────────
+  // CLAUDE API
+  // ──────────────────────────────────────────────────
+  async function callClaude() {
+    const res = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers })
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => res.statusText);
+      throw new Error(`API error ${res.status}: ${txt}`);
+    }
+
+    const data = await res.json();
+    let raw = data.content[0].text.trim();
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    return JSON.parse(raw);
+  }
+
+  // ──────────────────────────────────────────────────
+  // BUILD RESULT UI
+  // ──────────────────────────────────────────────────
+  function buildResultUI(title, description, imgSrc) {
+    document.getElementById('brief-title').textContent = title;
+
+    const descEl = document.getElementById('brief-desc');
+    const paras = description.split(/\n\n+/).filter(p => p.trim());
+    descEl.innerHTML = paras.length > 1
+      ? paras.map(p => `<p>${p.trim()}</p>`).join('')
+      : `<p>${description.trim()}</p>`;
+
+    const specsEl = document.getElementById('specs-grid');
+    const specs = [
+      { label: 'Location',    value: answers[0] },
+      { label: 'Style',       value: answers[2] },
+      { label: 'Key Feature', value: answers[6] },
+      { label: 'Feeling',     value: answers[9] }
+    ];
+    specsEl.innerHTML = specs.map(s => `
+      <div class="spec-card">
+        <div class="spec-label">${s.label}</div>
+        <div class="spec-value">${s.value}</div>
+      </div>
+    `).join('');
+
+    loadImageWithRetry(imgSrc);
+  }
+
+  function buildResultUIError(msg) {
+    const eb = document.getElementById('error-block');
+    eb.querySelector('p') && (eb.querySelector('p').textContent = msg);
+    // Replace inner content
+    eb.innerHTML = msg + '<br><button class="btn-retry" id="btn-retry">Retry &rarr;</button>';
+    eb.classList.add('show');
+
+    document.getElementById('image-container').classList.remove('shimmer');
+    document.getElementById('image-container').innerHTML =
+      `<div class="img-timeout"><p>No image could be generated.</p></div>`;
+
+    document.getElementById('btn-retry').addEventListener('click', () => {
+      eb.classList.remove('show');
+      beginGeneration();
+    });
+  }
+
+  // ──────────────────────────────────────────────────
+  // DOWNLOAD
+  // ──────────────────────────────────────────────────
+  document.getElementById('btn-download').addEventListener('click', async () => {
+    if (!imageUrl) return;
+    try {
+      const r = await fetch(imageUrl);
+      const blob = await r.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'my-dream-home.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch {
+      window.open(imageUrl, '_blank', 'noopener');
+    }
+  });
+
+  // ──────────────────────────────────────────────────
+  // LIGHTBOX
+  // ──────────────────────────────────────────────────
+  const lightboxOverlay = document.getElementById('lightbox-overlay');
+
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    lightboxOverlay.classList.add('open');
+    document.getElementById('lightbox-close').focus();
+  }
+  function closeLightbox() {
+    lightboxOverlay.classList.remove('open');
+  }
+
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+  lightboxOverlay.addEventListener('click', e => { if (e.target === lightboxOverlay) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && lightboxOverlay.classList.contains('open')) closeLightbox();
+  });
+
+  // ──────────────────────────────────────────────────
+  // SHARE MODAL
+  // ──────────────────────────────────────────────────
+  const overlay = document.getElementById('share-overlay');
+
+  function openModal() {
+    overlay.classList.add('open');
+    document.getElementById('modal-close').focus();
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.getElementById('btn-share-open').focus();
+  }
+
+  document.getElementById('btn-share-open').addEventListener('click', openModal);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+
+  const SHARE_TEXT = "I just designed my dream home with AI — check it out!";
+  const SHARE_URL  = window.location.href;
+
+  document.getElementById('btn-copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(SHARE_TEXT + ' ' + SHARE_URL);
+      document.getElementById('copy-feedback').textContent = 'Copied to clipboard ✓';
+    } catch {
+      document.getElementById('copy-feedback').textContent = 'Could not copy — please copy the URL manually.';
+    }
+    setTimeout(() => { document.getElementById('copy-feedback').textContent = ''; }, 3500);
+  });
+
+  document.getElementById('btn-twitter').addEventListener('click', () => {
+    window.open(
+      'https://twitter.com/intent/tweet?text=' + encodeURIComponent(SHARE_TEXT) + '&url=' + encodeURIComponent(SHARE_URL),
+      '_blank', 'noopener,width=560,height=420'
+    );
+  });
+
+  document.getElementById('btn-whatsapp').addEventListener('click', () => {
+    window.open(
+      'https://wa.me/?text=' + encodeURIComponent(SHARE_TEXT + ' ' + SHARE_URL),
+      '_blank', 'noopener'
+    );
+  });
+
+  // ──────────────────────────────────────────────────
+  // RESET / RESTART
+  // ──────────────────────────────────────────────────
+  function resetAll() {
+    currentQ      = 0;
+    answers       = new Array(10).fill(null);
+    imageUrl      = null;
+    lastImgPrompt = null;
+    clearInterval(_progressTimer);
+
+    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('progress-bar-wrap').setAttribute('aria-valuenow', '0');
+    document.getElementById('brief-title').innerHTML = '&nbsp;';
+    document.getElementById('brief-desc').innerHTML  = '';
+    document.getElementById('specs-grid').innerHTML  = '';
+    document.getElementById('image-container').innerHTML = '';
+    document.getElementById('image-container').classList.add('shimmer');
+
+    const eb = document.getElementById('error-block');
+    eb.classList.remove('show');
+    eb.innerHTML = 'Something went wrong generating your brief. Please try again.<br><button class="btn-retry" id="btn-retry">Retry &rarr;</button>';
+
+    document.getElementById('copy-feedback').textContent = '';
+    closeModal();
+  }
+
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    resetAll();
+    showScreen('screen-landing');
+  });
+
+  // ──────────────────────────────────────────────────
+  // START
+  // ──────────────────────────────────────────────────
+  document.getElementById('btn-begin').addEventListener('click', () => {
+    showScreen('screen-quiz');
+    renderQuestion(0);
+  });
+</script>
+</body>
+</html>

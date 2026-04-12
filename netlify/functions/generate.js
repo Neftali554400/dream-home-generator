@@ -1,0 +1,63 @@
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured' }) };
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
+  }
+
+  const userMsg = `Here are the quiz answers:
+1. Location: ${body.answers[0]}
+2. Setting: ${body.answers[1]}
+3. Style: ${body.answers[2]}
+4. Exterior priority: ${body.answers[3]}
+5. Light: ${body.answers[4]}
+6. Interior vibe: ${body.answers[5]}
+7. Key feature: ${body.answers[6]}
+8. Indoor/outdoor: ${body.answers[7]}
+9. Materials: ${body.answers[8]}
+10. Feeling: ${body.answers[9]}
+
+Generate the title, description, and image prompt.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: `You are an architectural prompt engineer. Given 10 quiz answers about someone's dream home preferences, you will do three things:
+
+1. Write a title for their dream home (6 words or fewer, evocative, like 'A Coastal Modern Sanctuary' or 'The Desert Glass House').
+
+2. Write a 3-paragraph architectural description (150–200 words total) in the editorial voice of an architecture magazine. Precise, sensory, no hype. Describe materials, light, relationship to landscape, and feeling.
+
+3. Write an image generation prompt (1 paragraph, under 80 words) optimised for photorealistic architectural renders. Include: location type, architectural style, exterior materials, lighting conditions, key features, time of day. Be specific and visual. Start with 'Photorealistic architectural photograph of'
+
+Return ONLY valid JSON — no markdown fences, no commentary — in exactly this format:
+{"title":"...","description":"...","imagePrompt":"..."}`,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  const data = await res.json();
+
+  return {
+    statusCode: res.status,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  };
+};
