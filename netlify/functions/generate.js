@@ -47,7 +47,7 @@ Generate the title, description, and image prompt.`;
 
 2. Write a 3-paragraph architectural description (150–200 words total) in the editorial voice of an architecture magazine. Precise, sensory, no hype. Describe materials, light, relationship to landscape, and feeling.
 
-3. Write an image generation prompt (1 paragraph, under 80 words) optimised for photorealistic architectural renders. Include: location type, architectural style, exterior materials, lighting conditions, key features, time of day. Be specific and visual. Start with 'Photorealistic architectural photograph of'
+3. Write an image generation prompt (1 paragraph, under 80 words) optimised for stunning architectural renders. The image must be PORTRAIT orientation (vertical, taller than wide). Use a dramatic elevated 3/4 aerial angle showing the full home embedded in its natural landscape surroundings (trees, terrain, sky). Include: location type, architectural style, exterior materials, golden hour or dusk lighting, key features. Vivid, painterly, cinematic quality. Start with 'Portrait orientation, dramatic aerial 3/4 view, architectural render of'
 
 Return ONLY valid JSON — no markdown fences, no commentary — in exactly this format:
 {"title":"...","description":"...","imagePrompt":"..."}`

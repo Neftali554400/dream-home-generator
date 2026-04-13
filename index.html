@@ -456,12 +456,13 @@
 
     .result-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 420px 1fr;
       gap: 52px;
-      max-width: 1160px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 52px 36px 96px;
       animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+      align-items: start;
     }
     @media (max-width: 767px) {
       .result-grid {
@@ -476,7 +477,7 @@
       border-radius: 8px;
       overflow: hidden;
       background: var(--off-white);
-      aspect-ratio: 16/9;
+      aspect-ratio: 3/4;
       position: relative;
       min-height: 180px;
     }
@@ -950,7 +951,7 @@
 <div class="overlay" id="lightbox-overlay" role="dialog" aria-modal="true" aria-label="Expanded home image" style="padding:0;">
   <div id="lightbox-inner" style="position:relative;max-width:92vw;max-height:92vh;display:flex;align-items:center;justify-content:center;">
     <img id="lightbox-img" src="" alt="Dream home expanded view"
-      style="max-width:92vw;max-height:92vh;width:auto;height:auto;border-radius:6px;display:block;box-shadow:0 32px 80px rgba(0,0,0,0.5);image-rendering:auto;">
+      style="max-width:min(92vw,560px);max-height:92vh;width:auto;height:auto;border-radius:6px;display:block;box-shadow:0 32px 80px rgba(0,0,0,0.5);image-rendering:auto;">
     <button id="lightbox-close" aria-label="Close"
       style="position:absolute;top:-14px;right:-14px;width:32px;height:32px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.2);color:var(--text-mid);transition:background 0.14s;">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -1233,7 +1234,7 @@
       lastImgPrompt = imagePrompt;
 
       const seed = Math.floor(Math.random() * 99999);
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1280&height=720&model=turbo&seed=${seed}`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=768&height=1024&model=turbo&seed=${seed}`;
       console.log('[Pollinations URL]', imageUrl);
 
       buildResultUI(title, description, imageUrl);
@@ -1253,7 +1254,7 @@
   function retryImage() {
     if (!lastImgPrompt) return;
     const seed = Math.floor(Math.random() * 99999);
-    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(lastImgPrompt)}?width=1280&height=720&model=turbo&seed=${seed}`;
+    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(lastImgPrompt)}?width=768&height=1024&model=turbo&seed=${seed}`;
     console.log('[Pollinations retry URL]', imageUrl);
     loadImageWithRetry(imageUrl);
   }
