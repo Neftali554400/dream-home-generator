@@ -47,7 +47,7 @@ Generate the title, description, and image prompt.`;
 
 2. Write a 3-paragraph architectural description (150–200 words total) in the editorial voice of an architecture magazine. Precise, sensory, no hype. Describe materials, light, relationship to landscape, and feeling.
 
-3. Write an image generation prompt (1 paragraph, under 80 words) that generates a stunning watercolor painting of the home. PORTRAIT orientation (vertical, taller than wide). Dramatic elevated 3/4 aerial perspective showing the full home nestled in lush natural surroundings (trees, mountains, sky). Golden hour or sunset lighting with warm glowing windows. Rich, vibrant watercolor washes, soft painterly edges, visible brushstrokes, luminous sky. Highly detailed architectural watercolor illustration. Start with 'Beautiful detailed watercolor painting, portrait orientation, aerial 3/4 perspective,'
+3. Write an image generation prompt (1 paragraph, under 80 words) that generates a stunning watercolor painting of the home. PORTRAIT orientation (vertical, taller than wide). Dramatic elevated 3/4 aerial perspective showing the full home nestled in lush natural surroundings (trees, mountains, sky). Golden hour or sunset lighting with warm glowing windows. Rich, vibrant watercolor washes, soft painterly edges, visible brushstrokes, luminous sky. Highly detailed architectural watercolor illustration. HD, ultra-detailed, 4K quality. Start with 'Stunning HD watercolor painting, highly detailed, ultra-fine brushwork, portrait orientation, aerial 3/4 perspective,'
 
 Return ONLY valid JSON — no markdown fences, no commentary — in exactly this format:
 {"title":"...","description":"...","imagePrompt":"..."}`

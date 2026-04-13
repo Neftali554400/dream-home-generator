@@ -1234,7 +1234,7 @@
       lastImgPrompt = imagePrompt;
 
       const seed = Math.floor(Math.random() * 99999);
-      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=768&height=1024&model=turbo&seed=${seed}`;
+      imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1365&model=flux&seed=${seed}`;
       console.log('[Pollinations URL]', imageUrl);
 
       buildResultUI(title, description, imageUrl);
@@ -1254,7 +1254,7 @@
   function retryImage() {
     if (!lastImgPrompt) return;
     const seed = Math.floor(Math.random() * 99999);
-    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(lastImgPrompt)}?width=768&height=1024&model=turbo&seed=${seed}`;
+    imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(lastImgPrompt)}?width=1024&height=1365&model=flux&seed=${seed}`;
     console.log('[Pollinations retry URL]', imageUrl);
     loadImageWithRetry(imageUrl);
   }
@@ -1299,7 +1299,7 @@
           </div>
         </div>
       `;
-      startProgressBar(8000); // estimate ~8s for turbo
+      startProgressBar(20000); // estimate ~20s for flux HD
     }
 
     const img = new Image();
