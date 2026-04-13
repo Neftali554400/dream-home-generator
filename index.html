@@ -1522,7 +1522,8 @@
     closeModal();
   }
 
-  document.getElementById('btn-restart').addEventListener('click', () => {
+  const btnRestart = document.getElementById('btn-restart');
+  if (btnRestart) btnRestart.addEventListener('click', () => {
     resetAll();
     showScreen('screen-landing');
   });
