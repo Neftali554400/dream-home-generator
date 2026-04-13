@@ -294,6 +294,44 @@
     }
     .quiz-opt:disabled { cursor: default; }
 
+    .quiz-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 24px;
+      min-height: 40px;
+    }
+    .btn-back {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px 4px;
+      min-height: 40px;
+      letter-spacing: 0.01em;
+      transition: color 0.14s;
+    }
+    .btn-back:hover { color: var(--text-dark); }
+    .btn-back:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; border-radius: 3px; }
+    .btn-continue {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--forest-primary);
+      background: none;
+      border: 1px solid var(--forest-primary);
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 9px 20px;
+      min-height: 40px;
+      transition: background 0.14s, color 0.14s;
+    }
+    .btn-continue:hover { background: var(--forest-primary); color: #fff; }
+    .btn-continue:focus-visible { outline: 2px solid var(--cta-blue); outline-offset: 2px; }
+
     .opt-check {
       width: 22px;
       height: 22px;
@@ -1060,16 +1098,19 @@
     wrap.style.transform = 'translateY(10px)';
 
     const delay = idx === 0 ? 0 : 180;
+    const existingAnswer = answers[idx];
+    const existingOptIdx = existingAnswer ? opts.indexOf(existingAnswer) : -1;
+
     setTimeout(() => {
       wrap.innerHTML = `
         <h2 class="quiz-q-text" id="q-text">${q}</h2>
         <div class="quiz-options" role="radiogroup" aria-labelledby="q-text">
           ${opts.map((o, i) => `
             <button
-              class="quiz-opt"
+              class="quiz-opt${i === existingOptIdx ? ' selected' : ''}"
               data-i="${i}"
               role="radio"
-              aria-checked="false"
+              aria-checked="${i === existingOptIdx ? 'true' : 'false'}"
               tabindex="0"
             >
               <span>${o}</span>
@@ -1080,6 +1121,14 @@
               </span>
             </button>
           `).join('')}
+        </div>
+        <div class="quiz-footer">
+          ${idx > 0
+            ? '<button class="btn-back" id="btn-back">← Back</button>'
+            : '<span></span>'}
+          ${existingAnswer
+            ? '<button class="btn-continue" id="btn-continue">Continue →</button>'
+            : '<span></span>'}
         </div>
       `;
 
@@ -1093,7 +1142,21 @@
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAnswer(idx, parseInt(btn.dataset.i)); }
         });
       });
+
+      const backBtn = document.getElementById('btn-back');
+      if (backBtn) backBtn.addEventListener('click', () => handleBack(idx));
+
+      const continueBtn = document.getElementById('btn-continue');
+      if (continueBtn) continueBtn.addEventListener('click', () => {
+        if (idx < 9) { currentQ = idx + 1; renderQuestion(currentQ); }
+        else beginGeneration();
+      });
     }, delay);
+  }
+
+  function handleBack(idx) {
+    currentQ = idx - 1;
+    renderQuestion(currentQ);
   }
 
   function handleAnswer(qIdx, optIdx) {
@@ -1106,10 +1169,13 @@
       if (parseInt(btn.dataset.i) === optIdx) {
         btn.classList.add('selected');
         btn.setAttribute('aria-checked', 'true');
+      } else {
+        btn.classList.remove('selected');
+        btn.setAttribute('aria-checked', 'false');
       }
     });
 
-    // Update progress to reflect answered question
+    // Update progress
     document.getElementById('progress-fill').style.width = ((qIdx + 1) / 10 * 100) + '%';
     document.getElementById('progress-bar-wrap').setAttribute('aria-valuenow', Math.round((qIdx + 1) / 10 * 100));
 
