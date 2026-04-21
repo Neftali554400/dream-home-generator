@@ -911,8 +911,7 @@
     <div>
       <div id="image-container" class="shimmer"></div>
       <div class="image-actions">
-        <button class="btn-img-action filled" id="btn-download">&darr; Download Image</button>
-        <button class="btn-img-action" id="btn-share-open">Share &rarr;</button>
+        <button class="btn-img-action filled" id="btn-download">&darr; Save Image</button>
       </div>
     </div>
 
@@ -959,54 +958,6 @@
     </button>
   </div>
 </div>
-
-<!-- ════════════════════════════════════════════════
-     SHARE MODAL
-════════════════════════════════════════════════ -->
-<div class="overlay" id="share-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
-  <div class="modal">
-    <button class="modal-close" id="modal-close" aria-label="Close">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </button>
-
-    <h3 class="modal-title" id="modal-heading">Share Your Dream Home</h3>
-    <p class="modal-sub">Show the world what AI designed for you.</p>
-
-    <div class="share-list">
-      <button class="btn-share-option" id="btn-copy">
-        <span class="share-icon" style="background:#F0EFED;" aria-hidden="true">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <path d="M5.5 9.5L9.5 5.5M6 3.5H3.5a2 2 0 000 4H4M9 11.5h2.5a2 2 0 000-4H11" stroke="#4A4A4A" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-        </span>
-        Copy Link
-      </button>
-
-      <button class="btn-share-option" id="btn-twitter">
-        <span class="share-icon" style="background:#000;" aria-hidden="true">
-          <svg width="14" height="13" viewBox="0 0 14 13" fill="none">
-            <path d="M8.12 5.52 13.2 0H12L7.56 4.8 3.74 0H0l5.32 7.74L0 13h1.2l4.65-5.41L9.8 13H13.6L8.12 5.52ZM6.52 6.85l-.54-.77-4.27-6.1H3.2L7 5.7l.54.77 4.47 6.4H10.5L6.52 6.85Z" fill="#fff"/>
-          </svg>
-        </span>
-        Share on X (Twitter)
-      </button>
-
-      <button class="btn-share-option" id="btn-whatsapp">
-        <span class="share-icon" style="background:#25D366;" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M8 1C4.13 1 1 4.13 1 8c0 1.24.34 2.4.92 3.4L1 15l3.68-.9A7 7 0 108 1zm0 12.6A5.6 5.6 0 012.4 8 5.6 5.6 0 018 2.4 5.6 5.6 0 0113.6 8 5.6 5.6 0 018 13.6zm3.06-4.22c-.17-.08-1-.5-1.16-.55-.15-.06-.27-.08-.38.08-.11.16-.44.55-.54.67-.1.11-.2.12-.37.04-.17-.08-.72-.27-1.37-.85a5.2 5.2 0 01-.95-1.18c-.1-.17-.01-.26.07-.34.08-.07.17-.2.26-.3.09-.1.11-.17.17-.28.06-.11.03-.21-.01-.29-.04-.08-.38-.91-.52-1.25-.14-.32-.27-.28-.38-.28h-.33c-.11 0-.29.04-.44.2-.15.17-.59.58-.59 1.4 0 .83.6 1.63.69 1.74.08.11 1.19 1.81 2.87 2.54.4.17.72.28.96.35.4.13.77.11 1.06.07.32-.05 1-.41 1.14-.8.14-.4.14-.74.1-.8-.04-.08-.15-.12-.32-.2z" fill="#fff"/>
-          </svg>
-        </span>
-        Share on WhatsApp
-      </button>
-    </div>
-
-    <p class="copy-feedback" id="copy-feedback" aria-live="polite"></p>
-  </div>
-</div>
-
 
 <script>
   // ──────────────────────────────────────────────────
@@ -1411,22 +1362,38 @@
   }
 
   // ──────────────────────────────────────────────────
-  // DOWNLOAD
+  // SAVE / DOWNLOAD
   // ──────────────────────────────────────────────────
   document.getElementById('btn-download').addEventListener('click', async () => {
     if (!imageUrl) return;
+    const btn = document.getElementById('btn-download');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
     try {
       const r = await fetch(imageUrl);
       const blob = await r.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'my-dream-home.jpg';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    } catch {
-      window.open(imageUrl, '_blank', 'noopener');
+      const file = new File([blob], 'my-dream-home.jpg', { type: 'image/jpeg' });
+      // On iOS/Android: Web Share API saves to camera roll / share sheet
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'My Dream Home' });
+      } else {
+        // Desktop: anchor download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-dream-home.jpg';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        window.open(imageUrl, '_blank', 'noopener');
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '↓ Save Image';
     }
   });
 
@@ -1450,51 +1417,6 @@
     if (e.key === 'Escape' && lightboxOverlay.classList.contains('open')) closeLightbox();
   });
 
-  // ──────────────────────────────────────────────────
-  // SHARE MODAL
-  // ──────────────────────────────────────────────────
-  const overlay = document.getElementById('share-overlay');
-
-  function openModal() {
-    overlay.classList.add('open');
-    document.getElementById('modal-close').focus();
-  }
-  function closeModal() {
-    overlay.classList.remove('open');
-    document.getElementById('btn-share-open').focus();
-  }
-
-  document.getElementById('btn-share-open').addEventListener('click', openModal);
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
-
-  const SHARE_TEXT = "I just designed my dream home with AI — check it out!";
-  const SHARE_URL  = window.location.href;
-
-  document.getElementById('btn-copy').addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(SHARE_TEXT + ' ' + SHARE_URL);
-      document.getElementById('copy-feedback').textContent = 'Copied to clipboard ✓';
-    } catch {
-      document.getElementById('copy-feedback').textContent = 'Could not copy — please copy the URL manually.';
-    }
-    setTimeout(() => { document.getElementById('copy-feedback').textContent = ''; }, 3500);
-  });
-
-  document.getElementById('btn-twitter').addEventListener('click', () => {
-    window.open(
-      'https://twitter.com/intent/tweet?text=' + encodeURIComponent(SHARE_TEXT) + '&url=' + encodeURIComponent(SHARE_URL),
-      '_blank', 'noopener,width=560,height=420'
-    );
-  });
-
-  document.getElementById('btn-whatsapp').addEventListener('click', () => {
-    window.open(
-      'https://wa.me/?text=' + encodeURIComponent(SHARE_TEXT + ' ' + SHARE_URL),
-      '_blank', 'noopener'
-    );
-  });
 
   // ──────────────────────────────────────────────────
   // RESET / RESTART
