@@ -1372,25 +1372,16 @@
     try {
       const r = await fetch(imageUrl);
       const blob = await r.blob();
-      const file = new File([blob], 'my-dream-home.jpg', { type: 'image/jpeg' });
-      // On iOS/Android: Web Share API saves to camera roll / share sheet
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'My Dream Home' });
-      } else {
-        // Desktop: anchor download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'my-dream-home.jpg';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-      }
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        window.open(imageUrl, '_blank', 'noopener');
-      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my-dream-home.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch {
+      window.open(imageUrl, '_blank', 'noopener');
     } finally {
       btn.disabled = false;
       btn.textContent = '↓ Save Image';
